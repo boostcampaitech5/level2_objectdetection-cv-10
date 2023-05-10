@@ -83,15 +83,17 @@ def seed_everything(seed):
 def train(args):
     seed_everything(args.seed)
 
-    model_module = getattr(import_module("model"), args.model)
-    model_module = model_module()
-    cfg = init_config(model_module.cfg, args)
+    ## when use model.py
+    # basemodel = BaseModel(args.config_dir, args.model)
+    basemodel = Config.fromfile(args.cfg_dir)
+    print("import " + args.model)
+    cfg = init_config(basemodel.cfg, args)
 
     datasets = [build_dataset(cfg.data.train)]
     model = build_detector(cfg.model)
     model.init_weights()
 
-    train_detector(model, datasets[0], cfg, distributed=False, validate=False)
+    # train_detector(model, datasets[0], cfg, distributed=False, validate=False)
     # alarm()
     return
 

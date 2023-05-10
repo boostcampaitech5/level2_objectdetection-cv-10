@@ -7,8 +7,8 @@ from mmdet.datasets import (build_dataloader, build_dataset,
                             replace_ImageToTensor)
 from mmdet.utils import get_device
 
-class FasterRcnn():
-    def __init__(self):
+class BaseModel():
+    def __init__(self, cfg_dir, model_name):
         # config file 들고오기
-        self.cfg = Config.fromfile('baseline/mmdetection/configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py')
-        print("import FasterRcnn")
+        self.cfg = Config.fromfile(cfg_dir)
+        print("import " + model_name)
