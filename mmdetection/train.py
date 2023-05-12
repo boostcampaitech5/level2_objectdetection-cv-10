@@ -33,7 +33,9 @@ def find_work_dir(_model, is_train=True):
     if is_train:
         work_dir = "baseline/mmdetection/work_dirs/" + _model + "_trash"
     else:
-        work_dir = "baseline/mmdetection/work_dirs/" + _model + "_implement"
+        work_dir = "baseline/mmdetection/work_dirs/" + _model + "_inference"
+    
+    print("Work dir : ", work_dir)
     return work_dir
 
 def init_config(cfg, args):
