@@ -67,8 +67,8 @@ def init_config(cfg, args):
     # when model use roi-head
     if "roi_head" in cfg.model.keys():
         cfg.model.roi_head.bbox_head.num_classes = 10
-        cfg.model.roi_head.loss_cls.type = args.loss_cls
-        cfg.model.roi_head.loss_bbox.type = args.loss_bbox
+        cfg.model.roi_head.bbox_head.loss_cls.type = args.loss_cls
+        cfg.model.roi_head.bbox_head.loss_bbox.type = args.loss_bbox
     else:
         # when model not use roi-head
         cfg.model.bbox_head.num_classes = 10
@@ -83,7 +83,7 @@ def init_config(cfg, args):
     cfg.optimizer_config.grad_clip = dict(max_norm=35, norm_type=2)
     cfg.runner.max_epochs = args.epochs
 
-    cfg.workflow = [('train', 1), ('val', 1)]
+    cfg.workflow = [('train', 1)]
 
     cfg.checkpoint_config = dict(max_keep_ckpts=3, interval=1)
     cfg.device = get_device()
@@ -109,16 +109,16 @@ def train(args):
     basemodel_cfg = Config.fromfile(args.config_dir)
     print("import " + args.model)
     cfg = init_config(basemodel_cfg, args)
-
-    # cfg.log_config.hooks = [
-    #     dict(type='TextLoggerHook'),
-    #     dict(type='MMDetWandbHook',
-    #         init_kwargs={'project': 'mmdetection'},
-    #         interval=10,
-    #         log_checkpoint=True,
-    #         log_checkpoint_metadata=True,
-    #         num_eval_images=100,
-    #         bbox_score_thr=0.3)]
+    
+    cfg.log_config.hooks = [
+        dict(type='TextLoggerHook'),
+        dict(type='MMDetWandbHook',
+            init_kwargs={'project': 'mmdetection'},
+            interval=10,
+            log_checkpoint=True,
+            log_checkpoint_metadata=True,
+            num_eval_images=100,
+            bbox_score_thr=0.3)]
 
     datasets = [build_dataset(cfg.data.train)]
     model = build_detector(cfg.model)
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     parser.add_argument('--optimizer', type=str, default='SGD', help='optimizer type (default: SGD)')
     parser.add_argument('--lr', type=float, default=1e-3, help='learning rate (default: 1e-3)')
     parser.add_argument('--lr_decay_step', type=int, default=20, help='learning rate scheduler deacy step (default: 20)')
-    parser.add_argument('--loss_cls', type=str, default='FocalLoss', help='classification loss')
+    parser.add_argument('--loss_cls', type=str, default='CrossEntropyLoss', help='classification loss')
     parser.add_argument('--loss_bbox', type=str, default='SmoothL1Loss', help='classification loss')
 
     # Container environment
@@ -148,9 +148,9 @@ if __name__ == "__main__":
 
 
     # for log in wandb
-    # wandb.init(project=args.wandb_proj,
-    #            name = f"{args.config_dir.split('/')[-1].split('.')[0]}")
-    # wandb.config.update(args)
+    wandb.init(project=args.wandb_proj,
+               name = f"{args.config_dir.split('/')[-1].split('.')[0]}")
+    wandb.config.update(args)
     
     print(args)
 
