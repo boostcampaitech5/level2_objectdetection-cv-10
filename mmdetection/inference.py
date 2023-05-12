@@ -31,13 +31,13 @@ def inf_init_config(cfg, args):
 
     cfg.seed=2021
     cfg.gpu_ids = [1]
-    cfg.work_dir = find_work_dir(args.config_dir, is_train=False)
+    cfg.work_dir = find_work_dir(args.config_dir, is_train=True)
 
     # when model use roi-head
     if "roi_head" in cfg.model.keys():
         cfg.model.roi_head.bbox_head.num_classes = 10
-        cfg.model.roi_head.loss_cls.type = args.loss_cls
-        cfg.model.roi_head.loss_bbox.type = args.loss_bbox
+        cfg.model.roi_head.bbox_head.loss_cls.type = args.loss_cls
+        cfg.model.roi_head.bbox_head.loss_bbox.type = args.loss_bbox
     else:
         # when model not use roi-head
         cfg.model.bbox_head.num_classes = 10
@@ -50,6 +50,8 @@ def inf_init_config(cfg, args):
 
     cfg.optimizer_config.grad_clip = dict(max_norm=35, norm_type=2)
     cfg.model.train_cfg = None
+    
+    return cfg
 
 def inference(args):
     # config file 들고오기
@@ -77,7 +79,7 @@ def inference(args):
     model = MMDataParallel(model.cuda(), device_ids=[0])
 
     output = single_gpu_test(model, data_loader, show_score_thr=0.05) # output 계산
-
+    
     # submission 양식에 맞게 output 후처리
     prediction_strings = []
     file_names = []
@@ -97,10 +99,10 @@ def inference(args):
         file_names.append(image_info['file_name'])
 
 
-        submission = pd.DataFrame()
-        submission['PredictionString'] = prediction_strings
-        submission['image_id'] = file_names
-        submission.to_csv(os.path.join(cfg.work_dir, f'submission_{epoch}.csv'), index=None)
+    submission = pd.DataFrame()
+    submission['PredictionString'] = prediction_strings
+    submission['image_id'] = file_names
+    submission.to_csv(os.path.join(cfg.work_dir, f'submission_{epoch}.csv'), index=None)
 
 
 if __name__ == "__main__":
@@ -112,7 +114,7 @@ if __name__ == "__main__":
     parser.add_argument('--optimizer', type=str, default='SGD', help='optimizer type (default: SGD)')
     parser.add_argument('--lr', type=float, default=1e-3, help='learning rate (default: 1e-3)')
     parser.add_argument('--lr_decay_step', type=int, default=20, help='learning rate scheduler deacy step (default: 20)')
-    parser.add_argument('--loss_cls', type=str, default='FocalLoss', help='classification loss')
+    parser.add_argument('--loss_cls', type=str, default='CrossEntropyLoss', help='classification loss')
     parser.add_argument('--loss_bbox', type=str, default='SmoothL1Loss', help='classification loss')
 
     # Container environment
