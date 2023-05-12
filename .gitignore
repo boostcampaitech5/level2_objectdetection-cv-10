@@ -1,0 +1,7 @@
+.DS_Store
+detectron2/*.ipynb
+mmdetection/*.ipynb
+faster_rcnn/*.ipynb
+faster_rcnn/*/*.pth
+faster_rcnn/*/*.ipynb
+.ipynb_checkpoints
