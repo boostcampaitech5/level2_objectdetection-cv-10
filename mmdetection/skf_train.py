@@ -317,36 +317,37 @@ def seed_everything(seed):
     random.seed(seed)
 
 
-def train(i,args):
+def train(args):
     seed_everything(args.seed)
-
+    k = args.k
     ## when use model.py
     # basemodel = getattr(import_module("model"),args.model)
     # basemodel = basemodel()
     # cfg = init_config(basemodel.cfg, args)
 
-    basemodel_cfg = Config.fromfile(args.config_dir)
-    print("import " + args.model)
-    init_config = eval("init_config_" + str(i))
-    
-    cfg = init_config(basemodel_cfg, args)
-    
-    cfg.log_config.hooks = [
-        dict(type='TextLoggerHook'),
-        dict(type='MMDetWandbHook',
-            init_kwargs={'project': 'mmdetection'},
-            interval=10,
-            log_checkpoint=True,
-            log_checkpoint_metadata=True,
-            num_eval_images=100,
-            bbox_score_thr=0.3)]
-    
-    datasets = [build_dataset(cfg.data.train)]
-    # print(type(datasets))
-    model = build_detector(cfg.model)
-    model.init_weights()
+    for i in range(k):
+        basemodel_cfg = Config.fromfile(args.config_dir)
+        print("import " + args.model)
+        init_config = eval("init_config_" + str(i))
+        
+        cfg = init_config(basemodel_cfg, args)
+        
+        cfg.log_config.hooks = [
+            dict(type='TextLoggerHook'),
+            dict(type='MMDetWandbHook',
+                init_kwargs={'project': 'mmdetection'},
+                interval=10,
+                log_checkpoint=True,
+                log_checkpoint_metadata=True,
+                num_eval_images=100,
+                bbox_score_thr=0.3)]
+        
+        datasets = [build_dataset(cfg.data.train)]
+        # print(type(datasets))
+        model = build_detector(cfg.model)
+        model.init_weights()
 
-    train_detector(i,model, datasets[0], cfg, distributed=False, validate=True)
+        train_detector(model, datasets[0], cfg, distributed=False, validate=True)
     return
 
 
@@ -355,7 +356,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--seed', type=int, default=42, help='random seed (default: 42)')
-    parser.add_argument('--epochs', type=int, default=1, help='number of epochs to train (default: 1)')
+    parser.add_argument('--epochs', type=int, default=10, help='number of epochs to train (default: 10)')
     parser.add_argument('--model', type=str, default='BaseModel', help='model type (default: BaseModel)')
     parser.add_argument('--optimizer', type=str, default='SGD', help='optimizer type (default: SGD)')
     parser.add_argument('--lr', type=float, default=1e-3, help='learning rate (default: 1e-3)')
@@ -367,28 +368,19 @@ if __name__ == "__main__":
     parser.add_argument('--data_dir', type=str, default=os.environ.get('SM_CHANNEL_TRAIN', 'dataset/'))
     parser.add_argument('--config_dir', type=str, default="./configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py")
     parser.add_argument('--wandb_proj', type=str, default='TrashDetection', help='wandb project name')
-
+    parser.add_argument('--k', type=int, default=5, help='number of k fold')
+    
     # # for log in wandb
     # wandb.init(project=args.wandb_proj,
     #            name = f"{args.config_dir.split('/')[-1].split('.')[0]}")
     # wandb.config.update(args)
     args = parser.parse_args()
     print(args)
-    train(0,args)
-    train(1,args)
-    train(2,args)
-    train(3,args)
-    train(4,args)
+    train(args)
     
 
     # # for log in wandb
     # wandb.init(project=args.wandb_proj,
     #            name = f"{args.config_dir.split('/')[-1].split('.')[0]}")
     # wandb.config.update(args)
-    
-    print(args)
-    
-    # 각각 pth가 저장되어야한다. inference에 5개를 다 돌리고 나온 ouput을 soft vote로 해야한다. 맞나
-    # 지금 문제 
-    # 1) 각각 pth가 저장이 되어야하는데 latest.pth(가장 최근의 것)만 저장이된다.
     
