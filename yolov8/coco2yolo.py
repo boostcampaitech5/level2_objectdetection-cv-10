@@ -1,9 +1,15 @@
 import argparse
 import json
 import os
+import shutil
+
+from skf_dataset_split import get_valid_ids
 
 parser = argparse.ArgumentParser(description="Convert Format COCO to YOLO.")
+
+# ! /opt/ml/dataset/train.json
 parser.add_argument("-j", help="JSON file", dest="json", required=True)
+# ! /opt/ml/yolo_dataset/skf_split_{idx}/labels
 parser.add_argument("-o", help="path to output folder", dest="out", required=True)
 
 args = parser.parse_args()
@@ -123,3 +129,15 @@ class COCO2YOLO:
 if __name__ == "__main__":
     c2y = COCO2YOLO()
     c2y.coco2yolo()
+
+    # ! SKF로 split한 5개의 YOLO format labels에 대해 Iteration 수행
+    valid_ids_list = get_valid_ids()
+    for kf_num, valid_ids in enumerate(valid_ids_list):
+        for valid_id in valid_ids:
+            valid_id = str(valid_id).zfill(4)
+
+            root_dir = f"/opt/ml/yolo_dataset/skf_split_{kf_num}/labels/"
+            train_txt = root_dir + f"train/{valid_id}.txt"
+            valid_dir = root_dir + "valid"
+            valid_txt = os.path.join(valid_dir, f"{valid_id}.txt")
+            shutil.move(train_txt, valid_txt)

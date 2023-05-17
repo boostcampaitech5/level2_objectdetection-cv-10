@@ -7,7 +7,7 @@ mode: train # YOLO mode, i.e. train, val, predict, export, track, benchmark
 # Train settings -------------------------------------------------------------------------------------------------------
 model: # path to model file, i.e. yolov8n.pt, yolov8n.yaml
 data: # path to data file, i.e. coco128.yaml
-epochs: 50 # number of epochs to train for
+epochs: 30 # number of epochs to train for
 patience: 50 # epochs to wait for no observable improvement for early stopping of training
 batch: 32 # number of images per batch (-1 for AutoBatch)
 imgsz: 640 # size of input images as integer or w,h
@@ -20,15 +20,15 @@ project: # project name
 name: # experiment name, results saved to 'project/name' directory
 exist_ok: False # whether to overwrite existing experiment
 pretrained: False # whether to use a pretrained model
-optimizer: AdamW # optimizer to use, choices=['SGD', 'Adam', 'AdamW', 'RMSProp']
+optimizer: Adam # optimizer to use, choices=['SGD', 'Adam', 'AdamW', 'RMSProp']
 verbose: True # whether to print verbose output
-seed: 0 # random seed for reproducibility
+seed: 2023 # random seed for reproducibility
 deterministic: True # whether to enable deterministic mode
 single_cls: False # train multi-class data as single-class
 image_weights: False # use weighted image selection for training
 rect: False # rectangular training if mode='train' or rectangular validation if mode='val'
 cos_lr: False # use cosine learning rate scheduler
-close_mosaic: 10 # disable mosaic augmentation for final 10 epochs
+close_mosaic: 0 # disable mosaic augmentation for final 10 epochs
 resume: False # resume training from last checkpoint
 amp: True # Automatic Mixed Precision (AMP) training, choices=[True, False], True runs AMP check
 # Segmentation
@@ -43,7 +43,7 @@ split: val # dataset split to use for validation, i.e. 'val', 'test' or 'train'
 save_json: False # save results to JSON file
 save_hybrid: False # save hybrid version of labels (labels + additional predictions)
 conf: # object confidence threshold for detection (default 0.25 predict, 0.001 val)
-iou: 0.7 # intersection over union (IoU) threshold for NMS
+iou: 0.5 # intersection over union (IoU) threshold for NMS
 max_det: 300 # maximum number of detections per image
 half: False # use half precision (FP16)
 dnn: False # use OpenCV DNN for ONNX inference
@@ -79,7 +79,7 @@ nms: False # CoreML: add NMS
 
 # Hyperparameters ------------------------------------------------------------------------------------------------------
 lr0: 0.001 # initial learning rate (i.e. SGD=1E-2, Adam=1E-3)
-lrf: 0.01 # final learning rate (lr0 * lrf)
+lrf: 0.1 # final learning rate (lr0 * lrf)
 momentum: 0.9 # SGD momentum/Adam beta1
 weight_decay: 0.0005 # optimizer weight decay 5e-4
 warmup_epochs: 3.0 # warmup epochs (fractions ok)
@@ -94,15 +94,15 @@ nbs: 64 # nominal batch size
 hsv_h: 0.015 # image HSV-Hue augmentation (fraction)
 hsv_s: 0.7 # image HSV-Saturation augmentation (fraction)
 hsv_v: 0.4 # image HSV-Value augmentation (fraction)
-degrees: 0.3 # image rotation (+/- deg)
-translate: 0.1 # image translation (+/- fraction)
+degrees: 0.4 # image rotation (+/- deg)
+translate: 0.2 # image translation (+/- fraction)
 scale: 0.5 # image scale (+/- gain)
 shear: 0.0 # image shear (+/- deg)
 perspective: 0.0 # image perspective (+/- fraction), range 0-0.001
 flipud: 0.5 # image flip up-down (probability)
 fliplr: 0.5 # image flip left-right (probability)
 mosaic: 1.0 # image mosaic (probability)
-mixup: 0.2 # image mixup (probability)
+mixup: 0.3 # image mixup (probability)
 copy_paste: 0.0 # segment copy-paste (probability)
 
 # Custom config.yaml ---------------------------------------------------------------------------------------------------
